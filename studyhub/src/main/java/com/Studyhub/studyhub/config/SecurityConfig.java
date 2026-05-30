@@ -60,23 +60,21 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        // Cập nhật domain Vercel của bạn tại đây
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "https://exe-202.vercel.app" // Domain Vercel của bạn
-        ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
-        config.setExposedHeaders(Arrays.asList("Authorization"));
-        config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
+ @Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    
+    // Sử dụng setAllowedOriginPatterns thay vì setAllowedOrigins
+    config.setAllowedOriginPatterns(Arrays.asList("*")); 
+    
+    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
+    config.setExposedHeaders(Arrays.asList("Authorization"));
+    config.setAllowCredentials(true); // Vẫn giữ true để dùng được JWT
+    config.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+}
 }
