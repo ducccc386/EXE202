@@ -1,4 +1,10 @@
 {
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ],
     "env": {
         "VITE_API_BASE_URL": "https://exe202-k4ik.onrender.com/api"
     }
