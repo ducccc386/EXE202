@@ -14,7 +14,7 @@ const RequestList = ({ isHomePage = true }) => {
     useEffect(() => {
         const fetchRequests = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/requests/homepage');
+                const response = await api.get('/requests/homepage');
                 if (!response.ok) throw new Error('Không thể tải dữ liệu');
                 const data = await response.json();
                 setRequests(data);
