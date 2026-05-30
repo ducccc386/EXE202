@@ -55,16 +55,8 @@ function App() {
         <RequestList isHomePage={true} />
         <TutorList isHomePage={true} />
       </div>
-
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-      />
-      <PostRequestModal
-        isOpen={isPostRequestOpen}
-        onClose={() => setIsPostRequestOpen(false)}
-      />
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} onLoginSuccess={handleLoginSuccess} />
+      <PostRequestModal isOpen={isPostRequestOpen} onClose={() => setIsPostRequestOpen(false)} />
     </div>
   );
 
@@ -73,53 +65,31 @@ function App() {
       <Routes>
         <Route path="/" element={<MainHomepageLayout />} />
 
-        {/* Route Phụ huynh: Khớp với Sidebar path='/parent/applications' */}
+        {/* Route Phụ huynh */}
         <Route path="/parent/applications" element={
           user && user.role === 'PARENT' ? (
             <ApplicationManager user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} onOpenPostRequest={() => setIsPostRequestOpen(true)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          ) : <Navigate to="/" replace />
         } />
 
-        {/* Route Gia sư: Khớp với Sidebar path='/tutor/history' */}
+        {/* Route Gia sư */}
         <Route path="/tutor/history" element={
           user && user.role === 'TUTOR' ? (
             <TutorApplicationHistory user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          ) : <Navigate to="/" replace />
         } />
 
-        {/* Route Chat: Dành cho cả Gia sư và Phụ huynh */}
-        <Route path="/chat" element={
-          user ? <ChatPage user={user} /> : <Navigate to="/" replace />
-        } />
-        <Route path="/chat/:conversationId" element={
-          user ? <ChatPage user={user} /> : <Navigate to="/" replace />
-        } />
+        {/* Route Chat */}
+        <Route path="/chat" element={user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} />
+        <Route path="/chat/:conversationId" element={user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} />
 
         {/* Các trang công khai */}
-        <Route path="/all-requests" element={
-          <AllRequests user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />
-        } />
-        <Route path="/all-tutors" element={
-          <AllTutors user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />
-        } />
+        <Route path="/all-requests" element={<AllRequests user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />} />
+        <Route path="/all-tutors" element={<AllTutors user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />} />
 
         {/* Route Admin */}
-        <Route path="/admin" element={
-          <AdminRoute>
-            <AdminDashboard onLogout={handleLogout} />
-          </AdminRoute>
-        } />
-        {/* Route Chat: Đã thêm onLogout để Navbar trong Chat hoạt động */}
-        <Route path="/chat" element={
-          user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />
-        } />
-        <Route path="/chat/:conversationId" element={
-          user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />
-        } />
+        <Route path="/admin" element={<AdminRoute><AdminDashboard onLogout={handleLogout} /></AdminRoute>} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

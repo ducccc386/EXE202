@@ -1,11 +1,18 @@
 import api from './api';
 
 export const applyForRequest = async (applicationData) => {
-    try {
-        const response = await api.post('/applications/apply', applicationData);
-        return response.data; // Trả về thông báo thành công
-    } catch (error) {
-        // Trả về lỗi chi tiết từ backend (ví dụ: "Bạn đã ứng tuyển lớp này rồi!")
-        throw error.response?.data || "Có lỗi xảy ra khi gửi đơn ứng tuyển.";
-    }
+    const response = await api.post('/applications/apply', applicationData);
+    return response.data;
+};
+
+export const getParentApplications = (parentId) => {
+    return api.get(`/applications/parent/${parentId}/dto`);
+};
+
+export const updateApplicationStatus = (appId, status) => {
+    return api.put(`/applications/${appId}/status?status=${status}`, {});
+};
+
+export const getTutorApplications = (tutorId) => {
+    return api.get(`/applications/tutor/${tutorId}/dto`);
 };
