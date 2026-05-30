@@ -10,8 +10,8 @@ const Navbar = ({ user, onOpenAuth, onLogout, onOpenPostRequest }) => {
                 {/* 1. LOGO */}
                 <Link to="/" className="flex items-center gap-3 cursor-pointer">
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-indigo-100 shadow-sm">
-                        <img src="/logo.png" alt="StudyHub Logo" className="w-full h-full object-cover"
-                            onError={(e) => { e.target.src = 'https://placehold.co/100x100?text=SH' }} />
+                        <img src="/src/assets/studyhub_logo.jpg" alt="StudyHub Logo" className="w-full h-full object-cover"
+                            onError={(e) => { e.target.src = 'https://placehold.co/?text=SH' }} />
                     </div>
                     <span className="text-2xl font-black text-indigo-900 tracking-tight">
                         Study<span className="text-orange-500">Hub</span>
