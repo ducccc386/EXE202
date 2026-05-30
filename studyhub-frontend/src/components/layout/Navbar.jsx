@@ -30,17 +30,16 @@ const Navbar = ({ user, onOpenAuth, onLogout, onOpenPostRequest }) => {
                         <Users className="w-4 h-4" /> Gia sư
                     </Link>
 
-                    {/* PHÂN QUYỀN HÀNH ĐỘNG */}
                     {/* PHÂN QUYỀN HÀNH ĐỘNG CHO TUTOR */}
                     {user && user.role === 'TUTOR' && (
-                        <Link to="/tutor/applications" className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                        <Link to="/tutor/history" className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
                             <ClipboardList className="w-4 h-4" /> Đơn ứng tuyển
                         </Link>
                     )}
 
                     {user && user.role === 'PARENT' && (
                         <>
-                            {/* Nút mới: Quản lý đơn ứng tuyển */}
+                            {/* Nút Quản lý */}
                             <Link to="/parent/applications" className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 transition-colors bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100">
                                 <Bell className="w-4 h-4" /> Quản lý
                             </Link>

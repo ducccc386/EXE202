@@ -25,8 +25,9 @@ public class BookingController {
     @PostMapping("/create")
     public ResponseEntity<String> createBooking(@RequestBody BookingCreateRequest request) {
         try {
+            System.out.println(">>> ĐÃ VÀO ĐẾN CONTROLLER, DỮ LIỆU: " + request.toString()); // Log tại đây
             bookingService.createBooking(request);
-            return ResponseEntity.ok("Đăng tin tìm gia sư thành công!");
+            return ResponseEntity.ok("Thành công");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Có lỗi xảy ra: " + e.getMessage());
         }

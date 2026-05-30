@@ -1,6 +1,7 @@
 package com.Studyhub.studyhub.controller;
 
 import com.Studyhub.studyhub.entity.Application;
+import com.Studyhub.studyhub.dto.request.ApplicationRequest;
 import com.Studyhub.studyhub.dto.response.ApplicationResponse;
 import com.Studyhub.studyhub.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +37,11 @@ public class ApplicationController {
     @GetMapping("/parent/{parentId}/dto")
     public ResponseEntity<List<ApplicationResponse>> getByParentDTO(@PathVariable Long parentId) {
         return ResponseEntity.ok(applicationService.getApplicationsByParentDTO(parentId));
+    }
+
+    @PostMapping("/apply")
+    public ResponseEntity<?> apply(@RequestBody ApplicationRequest request) {
+        applicationService.applyForRequest(request);
+        return ResponseEntity.ok("Ứng tuyển thành công!");
     }
 }

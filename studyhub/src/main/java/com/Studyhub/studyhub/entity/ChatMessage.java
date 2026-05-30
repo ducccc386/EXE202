@@ -17,12 +17,17 @@ public class ChatMessage {
 
     @ManyToOne
     @JoinColumn(name = "conversation_id")
-    private Conversation conversation; // Thuộc về hội thoại nào
+    private Conversation conversation;
 
-    private Long senderId; // ID của người gửi (có thể là User.id)
+    // CHỈNH SỬA ĐOẠN NÀY:
+    // Thêm insertable = false, updatable = false để tránh lỗi DuplicateMapping
+    @Column(name = "conversation_id", insertable = false, updatable = false)
+    private Long conversationId;
+
+    private Long senderId;
 
     @Column(columnDefinition = "TEXT")
-    private String content; // Nội dung tin nhắn
+    private String content;
 
     private LocalDateTime timestamp = LocalDateTime.now();
 }

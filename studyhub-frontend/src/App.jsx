@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Layout & Components
 import Navbar from './components/layout/Navbar';
 import HeroCarousel from './components/homepage/HeroCarousel';
 import QuickActions from './components/homepage/QuickActions';
@@ -10,11 +12,10 @@ import PostRequestModal from './components/layout/PostRequestModal';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRoute from './components/security/AdminRoute';
 
-// Các trang quản lý
+// Pages
 import ApplicationManager from './components/parent/ApplicationManager';
-import TutorApplicationHistory from './components/tutor/TutorApplicationHistory'; // Import trang gia sư
-
-// Các trang danh sách mở rộng
+import TutorApplicationHistory from './components/tutor/TutorApplicationHistory';
+import ChatPage from './pages/chat/ChatPage';
 import AllRequests from './pages/AllRequests';
 import AllTutors from './pages/AllTutors';
 
@@ -72,7 +73,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainHomepageLayout />} />
 
-        {/* Route Phụ huynh: Quản lý đơn đến */}
+        {/* Route Phụ huynh: Khớp với Sidebar path='/parent/applications' */}
         <Route path="/parent/applications" element={
           user && user.role === 'PARENT' ? (
             <ApplicationManager user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} onOpenPostRequest={() => setIsPostRequestOpen(true)} />
@@ -81,13 +82,21 @@ function App() {
           )
         } />
 
-        {/* Route Gia sư: Lịch sử ứng tuyển */}
-        <Route path="/tutor/applications" element={
+        {/* Route Gia sư: Khớp với Sidebar path='/tutor/history' */}
+        <Route path="/tutor/history" element={
           user && user.role === 'TUTOR' ? (
             <TutorApplicationHistory user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />
           ) : (
             <Navigate to="/" replace />
           )
+        } />
+
+        {/* Route Chat: Dành cho cả Gia sư và Phụ huynh */}
+        <Route path="/chat" element={
+          user ? <ChatPage user={user} /> : <Navigate to="/" replace />
+        } />
+        <Route path="/chat/:conversationId" element={
+          user ? <ChatPage user={user} /> : <Navigate to="/" replace />
         } />
 
         {/* Các trang công khai */}
@@ -104,7 +113,13 @@ function App() {
             <AdminDashboard onLogout={handleLogout} />
           </AdminRoute>
         } />
-
+        {/* Route Chat: Đã thêm onLogout để Navbar trong Chat hoạt động */}
+        <Route path="/chat" element={
+          user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />
+        } />
+        <Route path="/chat/:conversationId" element={
+          user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

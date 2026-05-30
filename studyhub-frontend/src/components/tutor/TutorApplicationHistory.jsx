@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Loader2, BookOpen, Clock } from 'lucide-react';
-import Navbar from '../layout/Navbar'; // Import đúng file Navbar của bạn
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../layout/Navbar';
+// Sửa thành đường dẫn thoát ra thư mục cha rồi vào layout
+import Sidebar from '../layout/Sidebar';
+import { Loader2, BookOpen, Clock, MessageCircle } from 'lucide-react';
 
 const TutorApplicationHistory = ({ user, onLogout, onOpenAuth, onOpenPostRequest }) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const handleGoToChat = async (appId) => {
+        try {
+            const res = await fetch(`/api/conversations/by-application/${appId}`);
+            if (res.ok) {
+                const data = await res.json();
+                navigate(`/chat/${data.id}`);
+            } else { alert("Phòng chat chưa được tạo!"); }
+        } catch (err) { console.error("Lỗi:", err); }
+    };
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -16,66 +30,48 @@ const TutorApplicationHistory = ({ user, onLogout, onOpenAuth, onOpenPostRequest
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 setHistory(res.data);
-            } catch (err) {
-                console.error("Lỗi:", err);
-            } finally {
-                setLoading(false);
-            }
+            } catch (err) { console.error("Lỗi:", err); }
+            finally { setLoading(false); }
         };
         fetchHistory();
     }, []);
 
+    const sortedHistory = [...history].sort((a, b) => {
+        if (a.status === 'ACCEPTED' && b.status !== 'ACCEPTED') return -1;
+        if (a.status !== 'ACCEPTED' && b.status === 'ACCEPTED') return 1;
+        return 0;
+    });
+
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Truyền các props này vào để Navbar hiển thị đúng user */}
-            <Navbar
-                user={user}
-                onLogout={onLogout}
-                onOpenAuth={onOpenAuth}
-                onOpenPostRequest={onOpenPostRequest}
-            />
-
-            <main className="max-w-5xl mx-auto py-8">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-black text-indigo-900">Lịch sử ứng tuyển</h1>
-                    <p className="text-gray-500">Theo dõi trạng thái các lớp bạn đã gửi đơn</p>
-                </header>
-
-                {loading ? (
-                    <div className="flex justify-center h-64 items-center bg-white rounded-2xl border border-gray-100">
-                        <Loader2 className="animate-spin w-10 h-10 text-indigo-500" />
-                    </div>
-                ) : (
-                    <div className="grid gap-4">
-                        {history.length > 0 ? history.map(app => (
-                            <div key={app.id} className="group p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all flex justify-between items-center">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                                        <BookOpen size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-lg text-gray-800">{app.requestTitle}</h3>
-                                        <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-                                            <Clock size={14} /> <span>Vừa cập nhật gần đây</span>
+            <Navbar user={user} onLogout={onLogout} onOpenAuth={onOpenAuth} onOpenPostRequest={onOpenPostRequest} />
+            <div className="max-w-6xl mx-auto flex gap-6 p-8">
+                <Sidebar role="TUTOR" />
+                <main className="flex-1">
+                    <header className="mb-8">
+                        <h1 className="text-3xl font-black text-indigo-900">Lịch sử ứng tuyển</h1>
+                    </header>
+                    {loading ? <div className="flex justify-center py-20"><Loader2 className="animate-spin w-10 h-10 text-indigo-500" /></div> :
+                        <div className="grid gap-4">
+                            {sortedHistory.map(app => (
+                                <div key={app.id} className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm flex justify-between items-center">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><BookOpen size={24} /></div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-800">{app.requestTitle}</h3>
+                                            <div className="flex items-center gap-2 text-sm text-gray-400"><Clock size={14} /> <span>Vừa cập nhật gần đây</span></div>
                                         </div>
                                     </div>
+                                    <div className="flex items-center gap-3">
+                                        {app.status === 'ACCEPTED' && <button onClick={() => handleGoToChat(app.id)} className="bg-indigo-600 text-white px-4 py-2 rounded-xl flex items-center gap-2"><MessageCircle size={16} /> Chat</button>}
+                                        <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase ${app.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>{app.status}</div>
+                                    </div>
                                 </div>
-                                <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${app.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-                                    app.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                                    }`}>
-                                    {app.status}
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                                <p className="text-gray-400 font-medium">Bạn chưa gửi đơn ứng tuyển nào.</p>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </main>
+                            ))}
+                        </div>}
+                </main>
+            </div>
         </div>
     );
 };
-
 export default TutorApplicationHistory;

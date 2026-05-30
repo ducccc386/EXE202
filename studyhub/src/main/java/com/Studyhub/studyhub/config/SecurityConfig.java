@@ -37,15 +37,20 @@ public class SecurityConfig {
                         .requestMatchers("/api/tutors/homepage/**").permitAll()
                         .requestMatchers("/api/requests/homepage/**").permitAll()
 
-                        // 2. Quyền Gia sư (Tutor)
+                        // Sửa đoạn này:
+                        // Sửa toàn bộ file SecurityConfig.java thành như thế này:
+                        .requestMatchers("/api/applications/apply").hasAuthority("ROLE_TUTOR") // THÊM ROLE_
                         .requestMatchers("/api/tutor/applications/**").hasAuthority("ROLE_TUTOR")
                         .requestMatchers("/api/tutors/manage/**").hasAuthority("ROLE_TUTOR")
-
-                        // 3. Quyền Phụ huynh (Parent)
                         .requestMatchers("/api/applications/parent/**").hasAuthority("ROLE_PARENT")
                         .requestMatchers("/api/applications/*/status").hasAuthority("ROLE_PARENT")
                         .requestMatchers("/api/requests/create").hasAuthority("ROLE_PARENT")
-
+                        // trong DB
+                        // Cho phép truy cập vào WebSocket endpoint và các API liên quan đến chat mà
+                        // không cần xác thực
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/conversations/**").permitAll()
+                        .requestMatchers("/api/messages/**").permitAll()
                         // 4. Các API cần xác thực (Authenticated)
                         .requestMatchers("/api/applications/request/**").authenticated()
 

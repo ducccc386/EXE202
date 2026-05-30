@@ -9,7 +9,9 @@ import com.Studyhub.studyhub.repository.ParentRequestRepository;
 import com.Studyhub.studyhub.repository.SubjectRepository;
 import com.Studyhub.studyhub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,31 +29,37 @@ public class BookingService {
     @Autowired
     private SubjectRepository subjectRepository;
 
+    @Transactional
     public void createBooking(BookingCreateRequest request) {
+        // 1. Lấy email từ token của người đang đăng nhập
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 2. Tìm User trong DB
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + email));
+
+        // LOG DEBUG: Kiểm tra xem ID có đúng là 3 không
+        System.out.println(
+                ">>> Đang tạo bài đăng cho User: " + currentUser.getFullName() + " | ID: " + currentUser.getId());
+
         ParentRequest parentRequest = new ParentRequest();
 
-        // 1. Gán Phụ huynh và Môn học mẫu (Lấy tạm ID = 1L để kiểm thử thông luồng kết
-        // nối)
-        User dummyParent = userRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản Phụ huynh hợp lệ!"));
-        parentRequest.setParent(dummyParent);
+        // 3. GÁN ĐÚNG USER ĐANG LOGIN
+        parentRequest.setParent(currentUser);
 
-        Subject dummySubject = subjectRepository.findById(1L)
+        // 4. Gán Môn học
+        Subject subject = subjectRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học hợp lệ!"));
-        parentRequest.setSubject(dummySubject);
+        parentRequest.setSubject(subject);
 
-        // 2. Gán các thông tin cơ bản lấy từ DTO (Frontend gửi lên)
+        // 5. Gán thông tin từ DTO
         parentRequest.setTitle("Tìm gia sư môn " + request.getSubject() + " " + request.getGrade());
         parentRequest.setGrade(request.getGrade());
-
-        if (request.getPrice() != null) {
-            parentRequest.setBudget(request.getPrice().doubleValue());
-        }
-
+        parentRequest.setBudget(request.getPrice() != null ? request.getPrice().doubleValue() : 0.0);
         parentRequest.setSessionsPerWeek(request.getSlotsPerWeek());
         parentRequest.setDescription(request.getDescription());
 
-        // Khớp kiểu dữ liệu Enum hình thức học (ONLINE / OFFLINE)
+        // Hình thức học
         try {
             parentRequest.setTeachingMode(
                     com.Studyhub.studyhub.entity.TeachingMode.valueOf(request.getTeachingMode().toUpperCase()));
@@ -59,34 +67,29 @@ public class BookingService {
             parentRequest.setTeachingMode(com.Studyhub.studyhub.entity.TeachingMode.ONLINE);
         }
 
-        // 3. Gán các trường thông tin địa chỉ và lịch học động từ Frontend sang
+        // Địa chỉ và Lịch
         parentRequest.setCity(request.getCity());
         parentRequest.setAddressDetail(request.getAddressDetail());
         parentRequest.setScheduleInfo(request.getScheduleInfo());
 
-        // 4. Khởi tạo các thông tin hệ thống (Khớp chính xác từng thuộc tính với Entity
-        // của bạn)
+        // Thông tin hệ thống
         parentRequest.setCreatedAt(LocalDateTime.now());
-        parentRequest.setStatus(com.Studyhub.studyhub.entity.Status.OPEN); // Gọi chuẩn Enum Status.OPEN
-        System.out.println(">>> DỮ LIỆU TỪ POSTMAN GỬI LÊN: " + request.getCity() + " | " + request.getAddressDetail());
-        // 5. Ghi dữ liệu xuống bảng Parent_Requests dưới MySQL
+        parentRequest.setStatus(com.Studyhub.studyhub.entity.Status.OPEN);
+
+        // 6. LƯU
         parentRequestRepository.save(parentRequest);
+        // Ép cứng bằng tay trước khi lưu để kiểm chứng
+        System.out.println(">>> TRƯỚC KHI SAVE: " + parentRequest.getParent().getId());
+        parentRequestRepository.saveAndFlush(parentRequest); // Dùng saveAndFlush để đẩy ngay xuống DB
     }
 
     public List<BookingResponse> getAllOpenRequests() {
-        // Lấy tất cả bài đăng có trạng thái là OPEN từ database
         return parentRequestRepository.findAll().stream()
                 .filter(request -> request.getStatus() == com.Studyhub.studyhub.entity.Status.OPEN)
                 .map(request -> new BookingResponse(
                         request.getId(),
-                        request.getParent() != null ? request.getParent().getFullName() : "Phụ huynh", // Giả định
-                                                                                                       // Entity User có
-                                                                                                       // hàm
-                                                                                                       // getFullName()
-                                                                                                       // hoặc getName()
-                        request.getSubject() != null ? request.getSubject().getName() : "Chưa rõ", // Giả định Entity
-                                                                                                   // Subject có hàm
-                                                                                                   // getName()
+                        request.getParent() != null ? request.getParent().getFullName() : "Phụ huynh",
+                        request.getSubject() != null ? request.getSubject().getName() : "Chưa rõ",
                         request.getTitle(),
                         request.getDescription(),
                         request.getGrade(),
