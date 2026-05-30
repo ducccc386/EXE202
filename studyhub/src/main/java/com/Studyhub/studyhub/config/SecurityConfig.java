@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -31,30 +32,28 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Cho phép truy cập công khai (Preflight & Public API)
+                        // 1. Cho phép truy cập công khai
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/").permitAll() // Fix lỗi 403 khi vào trang chủ
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/tutors/homepage/**").permitAll()
                         .requestMatchers("/api/requests/homepage/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/conversations/**").permitAll()
+                        .requestMatchers("/api/messages/**").permitAll()
 
-                        // Sửa đoạn này:
-                        // Sửa toàn bộ file SecurityConfig.java thành như thế này:
-                        .requestMatchers("/api/applications/apply").hasAuthority("ROLE_TUTOR") // THÊM ROLE_
+                        // 2. Phân quyền Authority
+                        .requestMatchers("/api/applications/apply").hasAuthority("ROLE_TUTOR")
                         .requestMatchers("/api/tutor/applications/**").hasAuthority("ROLE_TUTOR")
                         .requestMatchers("/api/tutors/manage/**").hasAuthority("ROLE_TUTOR")
                         .requestMatchers("/api/applications/parent/**").hasAuthority("ROLE_PARENT")
                         .requestMatchers("/api/applications/*/status").hasAuthority("ROLE_PARENT")
                         .requestMatchers("/api/requests/create").hasAuthority("ROLE_PARENT")
-                        // trong DB
-                        // Cho phép truy cập vào WebSocket endpoint và các API liên quan đến chat mà
-                        // không cần xác thực
-                        .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/api/conversations/**").permitAll()
-                        .requestMatchers("/api/messages/**").permitAll()
-                        // 4. Các API cần xác thực (Authenticated)
+
+                        // 3. API cần xác thực
                         .requestMatchers("/api/applications/request/**").authenticated()
 
-                        // 5. Mọi request còn lại yêu cầu đăng nhập
+                        // 4. Mọi request còn lại yêu cầu đăng nhập
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -64,7 +63,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5173"));
+        // Cập nhật domain Vercel của bạn tại đây
+        config.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://exe-202.vercel.app" // Domain Vercel của bạn
+        ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
         config.setExposedHeaders(Arrays.asList("Authorization"));
