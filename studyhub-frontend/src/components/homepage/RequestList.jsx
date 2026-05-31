@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ApplicationModal from '../layout/ApplicationModal';
+import api from '../../services/api';
 
 const RequestList = ({ isHomePage = true }) => {
     const [requests, setRequests] = useState([]);
@@ -14,10 +15,13 @@ const RequestList = ({ isHomePage = true }) => {
     useEffect(() => {
         const fetchRequests = async () => {
             try {
+                // SỬA: axios instance 'api' đã có baseURL là '/api', nên chỉ cần '/requests/homepage'
                 const response = await api.get('/requests/homepage');
-                if (!response.ok) throw new Error('Không thể tải dữ liệu');
-                const data = await response.json();
-                setRequests(data);
+
+                console.log("DEBUG - Dữ liệu nhận được từ Backend:", response.data);
+
+                // SỬA: Dùng response.data (vì axios tự parse JSON rồi)
+                setRequests(response.data);
             } catch (err) {
                 setError('Lỗi kết nối đến máy chủ.');
             } finally {
