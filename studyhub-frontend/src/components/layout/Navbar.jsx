@@ -13,9 +13,9 @@ const Navbar = ({ user, onOpenAuth, onLogout, onOpenPostRequest }) => {
                         <img src={studyhubLogo} alt="StudyHub Logo" className="w-full h-full object-cover"
                             onError={(e) => { e.target.src = 'https://placehold.co/?text=SH' }} />
                     </div>
-                    <span className="text-2xl font-black text-indigo-900 tracking-tight">
-                        Study<span className="text-orange-500">Hub</span>
-                    </span>
+                    <span className="text-2xl font-black tracking-tight">
+    <span className="text-[#1a3a8f]">Study</span><span className="text-[#00a8b8]">Hub</span>
+</span>
                 </Link>
 
                 {/* 2. MENU */}
