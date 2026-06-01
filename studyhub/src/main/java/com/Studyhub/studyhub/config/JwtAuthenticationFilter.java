@@ -23,13 +23,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // THÊM ĐOẠN NÀY ĐỂ BỎ QUA FILTER VỚI CÁC PATH CÔNG KHAI
+
         String path = request.getRequestURI();
-        if (path.startsWith("/api/tutors/") || path.startsWith("/api/auth/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+
+        // Mở cửa hoàn toàn cho các path public này, bỏ qua bước xác thực token
+        if (path.startsWith("/api/tutors") || path.startsWith("/api/auth/")
+                || "OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -38,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String email = tokenProvider.getEmailFromJWT(jwt);
-                String role = tokenProvider.getRoleFromJWT(jwt); // Token đã có ROLE_ rồi
+                String role = tokenProvider.getRoleFromJWT(jwt);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.singletonList(new SimpleGrantedAuthority(role)));
@@ -46,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
-            logger.error("Không thể thiết lập xác thực", ex);
+            logger.error("Lỗi xác thực JWT: ", ex);
         }
         filterChain.doFilter(request, response);
     }

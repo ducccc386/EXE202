@@ -31,31 +31,18 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Cho phép tất cả các đường dẫn GET vào tutor mà KHÔNG CẦN TOKEN
+                        // Rule quan trọng nhất: Cho phép tất cả access vào API tutor
                         .requestMatchers(HttpMethod.GET, "/api/tutors/**").permitAll()
-
-                        // 2. Các đường dẫn công khai khác
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/api/auth/**", "/ws/**", "/api/conversations/**", "/api/messages/**")
+                        .requestMatchers("/api/auth/**", "/api/tutors/homepage/**", "/api/requests/homepage/**")
                         .permitAll()
-                        .requestMatchers("/api/tutors/homepage/**", "/api/requests/homepage/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 3. Phân quyền Authority (Các rule khắt khe)
-                        .requestMatchers("/api/applications/apply", "/api/tutor/applications/**",
-                                "/api/tutors/manage/**")
-                        .hasAuthority("ROLE_TUTOR")
-                        .requestMatchers("/api/applications/parent/**", "/api/applications/*/status",
-                                "/api/requests/create")
+                        // Các rule phân quyền
+                        .requestMatchers("/api/applications/apply", "/api/tutors/manage/**").hasAuthority("ROLE_TUTOR")
+                        .requestMatchers("/api/applications/parent/**", "/api/requests/create")
                         .hasAuthority("ROLE_PARENT")
-                        .requestMatchers("/api/applications/request/**").authenticated()
 
-                        // 4. Mọi thứ khác bắt buộc phải có Token
                         .anyRequest().authenticated())
-                // 5. Thêm cấu hình này để nếu có lỗi, server sẽ in thẳng ra log
-                .exceptionHandling(ex -> ex.accessDeniedHandler((req, res, e) -> {
-                    System.err.println("!!! SPRING SECURITY CHẶN TẠI: " + req.getRequestURI());
-                    res.sendError(403, "Access Denied");
-                }))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -66,11 +53,9 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("*")); // Cho phép mọi header để tránh lỗi CORS
-        config.setExposedHeaders(Arrays.asList("Authorization"));
+        config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

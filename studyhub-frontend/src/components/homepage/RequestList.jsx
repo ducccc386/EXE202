@@ -15,20 +15,13 @@ const RequestList = ({ isHomePage = true }) => {
     useEffect(() => {
         const fetchRequests = async () => {
             try {
-<<<<<<< HEAD
-                // axios trả về dữ liệu trực tiếp trong response.data
-                const response = await api.get('/requests/homepage');
-                console.log("DEBUG - Dữ liệu nhận được từ Backend:", response.data);
-                setRequests(response.data); // Sửa: Dùng response.data thay vì response.json()
-=======
-                // SỬA: axios instance 'api' đã có baseURL là '/api', nên chỉ cần '/requests/homepage'
+                // Gọi API đúng 1 lần duy nhất
                 const response = await api.get('/requests/homepage');
 
                 console.log("DEBUG - Dữ liệu nhận được từ Backend:", response.data);
 
-                // SỬA: Dùng response.data (vì axios tự parse JSON rồi)
+                // Cập nhật state
                 setRequests(response.data);
->>>>>>> efb635aaa384d0f3f8a3acd158be0afefe5f2e8f
             } catch (err) {
                 console.error("DEBUG - Lỗi gọi API:", err);
                 setError('Lỗi kết nối đến máy chủ.');
@@ -67,7 +60,7 @@ const RequestList = ({ isHomePage = true }) => {
                         <p className="text-sm font-bold text-blue-600 my-1">Học phí: {item.budget?.toLocaleString()} VNĐ/tháng</p>
                         <p className="text-xs text-gray-500 italic mt-2 line-clamp-2">"{item.description}"</p>
 
-                        {/* Nút Nhận Lớp với logic phân quyền hiển thị */}
+                        {/* Nút Nhận Lớp */}
                         <button
                             onClick={() => handleApplyClick(item)}
                             className={`w-full mt-4 py-2 rounded-lg transition ${userRole === 'TUTOR'
