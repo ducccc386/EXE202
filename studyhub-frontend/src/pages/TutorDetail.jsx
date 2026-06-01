@@ -73,6 +73,31 @@ const TutorDetail = () => {
                     <div className="col-md-8">
                         <h3>Giới thiệu</h3>
                         <p>{tutor?.bio || 'Chưa có thông tin giới thiệu.'}</p>
+                        <div className="mt-3">
+                            <strong>Phương pháp dạy:</strong> <span>{tutor?.teachingMethod || 'Chưa cung cấp'}</span>
+                        </div>
+                        <div className="mt-2">
+                            <strong>Môn học:</strong> <span>{tutor?.subjects ? Array.from(tutor.subjects).join(', ') : 'Chưa rõ'}</span>
+                        </div>
+                        <div className="mt-2">
+                            <strong>Chứng chỉ:</strong>
+                            {tutor?.certificateNames && tutor.certificateNames.length > 0 ? (
+                                <ul className="list-disc ml-5">
+                                    {tutor.certificateNames.map((c, idx) => (
+                                        <li key={idx}>{c}</li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <span> Chưa cung cấp</span>
+                            )}
+                        </div>
+                        <div className="mt-3">
+                            {tutor?.verified ? (
+                                <span className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded">Đã xác thực</span>
+                            ) : (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">Chưa xác thực</span>
+                            )}
+                        </div>
                         <div className="d-flex gap-4 mt-3">
                             <div><strong>Học phí:</strong> {tutor?.hourlyRate}k/h</div>
                             <div><strong>Kinh nghiệm:</strong> {tutor?.experienceYears} năm</div>

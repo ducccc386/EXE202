@@ -67,6 +67,19 @@ const TutorDetailModal = ({ show, onHide, tutorId }) => {
                             <p><strong>Kinh nghiệm:</strong> {tutor.experienceYears} năm</p>
                             <p><strong>Khu vực:</strong> {tutor.city}</p>
                             <p><strong>Giới thiệu:</strong> {tutor.bio}</p>
+                            <p><strong>Phương pháp dạy:</strong> {tutor.teachingMethod || 'Chưa cung cấp'}</p>
+                            <p><strong>Môn học:</strong> {tutor.subjects ? Array.from(tutor.subjects).join(', ') : 'Chưa rõ'}</p>
+                            <p><strong>Chứng chỉ:</strong></p>
+                            {tutor.certificateNames && tutor.certificateNames.length > 0 ? (
+                                <ul className="list-disc ml-5">
+                                    {tutor.certificateNames.map((c, i) => <li key={i}>{c}</li>)}
+                                </ul>
+                            ) : (
+                                <div>Chưa có chứng chỉ</div>
+                            )}
+                            <div className="mt-2">
+                                {tutor.verified ? <span className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded">Đã xác thực</span> : <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">Chưa xác thực</span>}
+                            </div>
                         </div>
                     </div>
                 ) : (

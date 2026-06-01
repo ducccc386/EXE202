@@ -1,8 +1,26 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Import Link
+import { Link, useNavigate } from 'react-router-dom'; // Import Link
 import { Home, HelpCircle, LogIn, LogOut, User, ClipboardList, PlusCircle, BookOpen, Users, Bell } from 'lucide-react';
 import studyhubLogo from '../../assets/studyhub_logo.jpg';
 const Navbar = ({ user, onOpenAuth, onLogout, onOpenPostRequest }) => {
+    const navigate = useNavigate();
+
+    const handleFindTutor = () => {
+        if (user) {
+            navigate('/all-tutors');
+        } else {
+            onOpenAuth();
+        }
+    };
+
+    const handleBecomeTutor = () => {
+        if (user) {
+            navigate('/tutor/history');
+        } else {
+            onOpenAuth();
+        }
+    };
+
     return (
         <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -20,6 +38,12 @@ const Navbar = ({ user, onOpenAuth, onLogout, onOpenPostRequest }) => {
 
                 {/* 2. MENU */}
                 <div className="flex items-center gap-6 text-sm font-semibold text-gray-600">
+                    {/* Search bar + action buttons */}
+                    <div className="flex items-center bg-gray-50 border rounded-lg px-3 py-1">
+                        <input placeholder="Tìm gia sư, môn học, khu vực..." className="bg-transparent outline-none text-sm w-64" />
+                        <button onClick={handleFindTutor} className="ml-3 px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">Tìm gia sư</button>
+                        <button onClick={handleBecomeTutor} className="ml-2 px-3 py-1 bg-emerald-600 text-white rounded-md text-sm">Trở thành gia sư</button>
+                    </div>
                     <Link to="/" className="flex items-center gap-1.5 text-orange-500 hover:text-orange-600 transition-colors">
                         <Home className="w-4 h-4" /> Trang chủ
                     </Link>
