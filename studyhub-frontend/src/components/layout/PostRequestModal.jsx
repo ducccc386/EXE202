@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import api from '../../services/api';
 const PostRequestModal = ({ isOpen, onClose, onSubmitSuccess }) => {
     // 1. Khởi tạo trạng thái lưu trữ dữ liệu Form (Khớp các thuộc tính với DTO Backend)
     const [formData, setFormData] = useState({
@@ -42,40 +42,29 @@ const PostRequestModal = ({ isOpen, onClose, onSubmitSuccess }) => {
             slotsPerWeek: formData.slotsPerWeek ? parseInt(formData.slotsPerWeek) : null,
             teachingMode: formData.teachingMode,
             description: formData.description,
-
-            // Xử lý tự động điền dữ liệu nếu phụ huynh chọn hình thức học ONLINE
             city: formData.teachingMode === 'ONLINE' ? 'ONLINE' : formData.city,
             addressDetail: formData.teachingMode === 'ONLINE' ? 'Học trực tuyến qua mạng' : formData.addressDetail,
             scheduleInfo: formData.scheduleInfo || 'Lịch học linh hoạt'
         };
 
         try {
-            // 🔥 BƯỚC THẦN THÁNH: Lấy Token bảo mật từ localStorage mà bạn đã lưu lúc Đăng nhập
-            // Nếu lúc đăng nhập bạn lưu tên key là 'accessToken' thì hãy đổi 'token' thành 'accessToken' nhé!
-            const token = localStorage.getItem('token');
+            // 🔥 Sử dụng api.post thay vì fetch(). Nó tự động lấy Token từ localStorage 
+            // và tự động trỏ tới địa chỉ https://exe202-k4ik.onrender.com/api/
+            const response = await api.post('/requests/create', submitData);
 
-            const response = await fetch('http://localhost:8080/api/requests/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 🔥 ĐÃ THÊM: Đính kèm chìa khóa Token vào Header để dập dịch lỗi 403 Forbidden
-                    'Authorization': token ? `Bearer ${token}` : ''
-                },
-                body: JSON.stringify(submitData),
-            });
-
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
                 alert('Đăng tin tìm gia sư thành công!');
                 if (onSubmitSuccess) onSubmitSuccess();
-                onClose(); // Đóng Modal và xóa trắng dữ liệu
-            } else if (response.status === 403) {
-                setError('Lỗi 403: Tài khoản của bạn không có quyền đăng tin (Yêu cầu tài khoản Phụ huynh) hoặc Token đã hết hạn!');
-            } else {
-                const errMsg = await response.text();
-                setError(errMsg || 'Đăng tin thất bại, vui lòng kiểm tra lại dữ liệu.');
+                onClose();
             }
         } catch (err) {
-            setError('Lỗi kết nối: Không thể gửi yêu cầu xác thực đến máy chủ.');
+            console.error("Lỗi đăng tin:", err);
+            // Kiểm tra lỗi 403 (Quyền hạn) hoặc lỗi khác
+            if (err.response && err.response.status === 403) {
+                setError('Bạn không có quyền đăng tin (Cần tài khoản Phụ huynh).');
+            } else {
+                setError('Đăng tin thất bại, vui lòng kiểm tra lại kết nối!');
+            }
         } finally {
             setLoading(false);
         }
