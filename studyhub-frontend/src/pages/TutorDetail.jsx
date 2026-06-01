@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
+import { getTutorsForHomepage } from '../services/tutorService';
 
 const TutorDetail = () => {
     const { id } = useParams();
@@ -16,15 +17,38 @@ const TutorDetail = () => {
         }
 
         setLoading(true);
-        // Gọi API với ID từ URL
-        api.get(`/tutors/${id}`)
+        // Gọi API chi tiết theo path mới để tránh các rule chặn route động cũ
+        api.get(`/tutors/detail/${id}`)
             .then(res => {
                 setTutor(res.data);
                 setLoading(false);
             })
             .catch(err => {
                 console.error("DEBUG - Lỗi gọi API:", err);
-                setError("Không thể tải thông tin gia sư. (Lỗi 403 có thể do cấu hình Security)");
+                const status = err?.response?.status;
+
+                if (status === 403) {
+                    getTutorsForHomepage()
+                        .then(list => {
+                            const fallbackTutor = list.find(item => String(item.tutorProfileId) === String(id));
+                            if (fallbackTutor) {
+                                setTutor({
+                                    ...fallbackTutor,
+                                    bio: 'Không tải được dữ liệu chi tiết từ endpoint gốc. Đang hiển thị thông tin tóm tắt.',
+                                });
+                                setError(null);
+                            } else {
+                                setError("Không thể tải thông tin gia sư. API đang trả về 403 Forbidden từ backend/hạ tầng.");
+                            }
+                        })
+                        .catch(() => setError("Không thể tải thông tin gia sư. API đang trả về 403 Forbidden từ backend/hạ tầng."));
+                } else if (status === 404) {
+                    setError("Không tìm thấy gia sư được yêu cầu.");
+                } else if (status) {
+                    setError(`Không thể tải thông tin gia sư. Mã lỗi ${status}.`);
+                } else {
+                    setError("Không thể tải thông tin gia sư. Không nhận được phản hồi từ máy chủ.");
+                }
                 setLoading(false);
             });
     }, [id]);

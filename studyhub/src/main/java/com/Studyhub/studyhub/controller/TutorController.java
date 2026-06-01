@@ -27,6 +27,11 @@ public class TutorController {
         return ResponseEntity.ok(tutors);
     }
 
+    @GetMapping("/detail/{tutorId}")
+    public ResponseEntity<TutorResponse> getTutorDetailById(@PathVariable Long tutorId) {
+        return ResponseEntity.ok(tutorService.getTutorById(tutorId));
+    }
+
     @GetMapping("/{tutorId}")
     public ResponseEntity<TutorResponse> getTutorById(@PathVariable Long tutorId) {
         return ResponseEntity.ok(tutorService.getTutorById(tutorId));

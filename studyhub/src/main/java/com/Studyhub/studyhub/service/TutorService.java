@@ -8,7 +8,10 @@ import com.Studyhub.studyhub.entity.TutorProfile;
 import com.Studyhub.studyhub.repository.TutorProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -54,9 +57,10 @@ public class TutorService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public TutorResponse getTutorById(Long tutorId) {
-        TutorProfile profile = tutorProfileRepository.findById(tutorId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy gia sư"));
+        TutorProfile profile = tutorProfileRepository.findByIdWithDetails(tutorId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy gia sư"));
 
         TutorResponse res = new TutorResponse();
 
