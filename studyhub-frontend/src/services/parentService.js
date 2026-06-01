@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = "http://localhost:8080/api/applications";
+const API_BASE = "https://exe202-k4ik.onrender.com/api/applications";
 
 const getAuthHeader = () => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
