@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css'; // <--- TH
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Layout & Components
 import Navbar from './components/layout/Navbar';
@@ -20,9 +20,23 @@ import ChatPage from './pages/chat/ChatPage';
 import AllRequests from './pages/AllRequests';
 import AllTutors from './pages/AllTutors';
 import TutorDetail from './pages/TutorDetail';
+
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isPostRequestOpen, setIsPostRequestOpen] = useState(false);
+
+  // ── Bộ lọc gia sư ──────────────────────────────────────────────────────────
+  const [activeFilters, setActiveFilters] = useState(null);
+  const tutorSectionRef = useRef(null);
+
+  const handleFindTutor = (filters) => {
+    setActiveFilters(filters);
+    // Scroll mượt xuống phần Gia sư nổi bật
+    setTimeout(() => {
+      tutorSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
+  // ───────────────────────────────────────────────────────────────────────────
 
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem('token');
@@ -32,14 +46,12 @@ function App() {
     return token ? { token, fullName, role, userId } : null;
   });
 
-  const handleLoginSuccess = (loggedInUser) => {
-    setUser(loggedInUser);
-  };
+  const handleLoginSuccess = (loggedInUser) => setUser(loggedInUser);
 
   const handleLogout = () => {
     localStorage.clear();
     setUser(null);
-    window.location.href = "/";
+    window.location.href = '/';
   };
 
   const MainHomepageLayout = () => (
@@ -52,12 +64,19 @@ function App() {
           onLogout={handleLogout}
         />
         <HeroCarousel />
-        <QuickActions />
+        <QuickActions onFindTutor={handleFindTutor} />
         <RequestList isHomePage={true} />
-        <TutorList isHomePage={true} />
+        <TutorList ref={tutorSectionRef} isHomePage={true} filters={activeFilters} />
       </div>
-      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} onLoginSuccess={handleLoginSuccess} />
-      <PostRequestModal isOpen={isPostRequestOpen} onClose={() => setIsPostRequestOpen(false)} />
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+      <PostRequestModal
+        isOpen={isPostRequestOpen}
+        onClose={() => setIsPostRequestOpen(false)}
+      />
     </div>
   );
 
@@ -88,6 +107,7 @@ function App() {
         <Route path="/all-requests" element={<AllRequests user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />} />
         <Route path="/all-tutors" element={<AllTutors user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />} />
         <Route path="/tutor/:id" element={<TutorDetail />} />
+
         {/* Route Admin */}
         <Route path="/admin" element={<AdminRoute><AdminDashboard onLogout={handleLogout} /></AdminRoute>} />
 
