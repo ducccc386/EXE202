@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { getTutorsForHomepage } from '../services/tutorService';
+import Navbar from '../components/layout/Navbar';
 
 const TutorDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    // Build a simple `user` object from localStorage to pass into Navbar and control auth flows
+    const token = localStorage.getItem('token');
+    const user = token
+        ? {
+              token,
+              fullName: localStorage.getItem('userFullName'),
+              role: localStorage.getItem('userRole'),
+              userId: localStorage.getItem('userId'),
+          }
+        : null;
     const [tutor, setTutor] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -57,7 +69,14 @@ const TutorDetail = () => {
     if (error) return <div className="alert alert-danger text-center mt-5">{error}</div>;
 
     return (
-        <div className="container mt-5">
+        <>
+            <Navbar
+                user={user}
+                onOpenAuth={() => navigate('/login')}
+                onLogout={() => { localStorage.clear(); navigate('/'); }}
+                onOpenPostRequest={() => { if (user) navigate('/parent/applications'); else navigate('/login'); }}
+            />
+            <div className="container mt-5">
             <Link to="/" className="btn btn-secondary mb-3">Quay lại trang chủ</Link>
             <div className="card p-4 shadow-sm" style={{ borderRadius: '15px' }}>
                 <div className="row">
@@ -65,8 +84,9 @@ const TutorDetail = () => {
                         <img
                             src={tutor?.avatarUrl || '/default-avatar.png'}
                             alt="Avatar"
-                            className="rounded-circle img-fluid"
+                            className="rounded-circle img-fluid cursor-pointer"
                             style={{ width: '200px', height: '200px', objectFit: 'cover' }}
+                            onClick={() => { if (!user) navigate('/login'); }}
                         />
                         <h2 className="mt-3">{tutor?.fullName}</h2>
                     </div>
@@ -101,11 +121,19 @@ const TutorDetail = () => {
                         <div className="d-flex gap-4 mt-3">
                             <div><strong>Học phí:</strong> {tutor?.hourlyRate}k/h</div>
                             <div><strong>Kinh nghiệm:</strong> {tutor?.experienceYears} năm</div>
+                            <div>
+                                {user && user.role === 'TUTOR' && (
+                                    <button className="btn btn-outline-primary ms-4" onClick={() => navigate('/profile')}>
+                                        Chỉnh sửa hồ sơ
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 };
 
