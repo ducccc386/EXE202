@@ -26,27 +26,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Mở cửa hoàn toàn cho các path public này, bỏ qua bước xác thực token
-        if (path.startsWith("/api/tutors") || path.startsWith("/api/auth/")
-                || "OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        // 1. Logic giữ nguyên: Bỏ qua các đường dẫn công khai (Public)
+        // Chúng ta chỉ bỏ qua những thứ thực sự không cần login
+        if (path.startsWith("/api/auth/") ||
+                path.startsWith("/api/tutors/homepage/") ||
+                path.startsWith("/api/requests/homepage/") ||
+                "OPTIONS".equalsIgnoreCase(request.getMethod())) {
+
             filterChain.doFilter(request, response);
             return;
         }
 
+        // 2. Logic xác thực JWT cho các API còn lại (bao gồm /api/tutors/profile/)
         try {
             String jwt = getJwtFromRequest(request);
+
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String email = tokenProvider.getEmailFromJWT(jwt);
                 String role = tokenProvider.getRoleFromJWT(jwt);
 
+                // Cấp quyền cho user
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.singletonList(new SimpleGrantedAuthority(role)));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
+            // Không chặn request tại đây, chỉ log lỗi để hệ thống vẫn chạy tiếp
+            // Nếu token sai, SecurityContextHolder sẽ không được set,
+            // và Spring Security sẽ xử lý dựa trên cấu hình trong SecurityConfig
             logger.error("Lỗi xác thực JWT: ", ex);
         }
+
         filterChain.doFilter(request, response);
     }
 

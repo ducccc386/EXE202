@@ -31,18 +31,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Rule quan trọng nhất: Cho phép tất cả access vào API tutor
-                        .requestMatchers(HttpMethod.GET, "/api/tutors/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/tutors/homepage/**", "/api/requests/homepage/**")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Các rule phân quyền
-                        .requestMatchers("/api/applications/apply", "/api/tutors/manage/**").hasAuthority("ROLE_TUTOR")
-                        .requestMatchers("/api/applications/parent/**", "/api/requests/create")
-                        .hasAuthority("ROLE_PARENT")
-
-                        .anyRequest().authenticated())
+                        // MỞ TOÀN BỘ QUYỀN TRUY CẬP
+                        .anyRequest().permitAll())
+                // Vẫn giữ lại bộ lọc JWT nếu bạn cần thông tin user trong Controller,
+                // nhưng giờ nó sẽ không chặn bất kỳ request nào nữa
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

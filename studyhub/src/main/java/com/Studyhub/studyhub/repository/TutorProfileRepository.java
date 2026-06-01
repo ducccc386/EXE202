@@ -19,4 +19,6 @@ public interface TutorProfileRepository extends JpaRepository<TutorProfile, Long
     Optional<TutorProfile> findByIdWithDetails(@Param("id") Long id);
 
     TutorProfile findByUserEmail(String email);
+
+    Optional<TutorProfile> findByUserId(Long userId);
 }

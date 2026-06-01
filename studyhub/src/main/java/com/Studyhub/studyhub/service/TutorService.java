@@ -1,5 +1,6 @@
 package com.Studyhub.studyhub.service;
 
+import com.Studyhub.studyhub.dto.request.TutorProfileUpdateRequest;
 import com.Studyhub.studyhub.dto.response.TutorCardResponse;
 import com.Studyhub.studyhub.dto.response.TutorResponse;
 import com.Studyhub.studyhub.entity.Subject;
@@ -60,7 +61,7 @@ public class TutorService {
     @Transactional(readOnly = true)
     public TutorResponse getTutorById(Long tutorId) {
         TutorProfile profile = tutorProfileRepository.findByIdWithDetails(tutorId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy gia sư"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy gia sư"));
 
         TutorResponse res = new TutorResponse();
 
@@ -81,5 +82,28 @@ public class TutorService {
         }
 
         return res;
+    }
+
+    @Transactional
+    public TutorProfile updateProfile(Long userId, TutorProfileUpdateRequest request) {
+        // Tìm profile theo userId của người đang đăng nhập
+        TutorProfile profile = tutorProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ"));
+
+        // Cập nhật thông tin
+        if (request.getBio() != null)
+            profile.setBio(request.getBio());
+        if (request.getEducation() != null)
+            profile.setEducation(request.getEducation());
+        if (request.getExperienceYears() != null)
+            profile.setExperienceYears(request.getExperienceYears());
+        if (request.getTeachingMethod() != null)
+            profile.setTeachingMethod(request.getTeachingMethod());
+        if (request.getHourlyRate() != null)
+            profile.setHourlyRate(request.getHourlyRate());
+        if (request.getCity() != null)
+            profile.setCity(request.getCity());
+
+        return tutorProfileRepository.save(profile);
     }
 }

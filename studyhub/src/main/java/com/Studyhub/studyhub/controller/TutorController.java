@@ -1,13 +1,17 @@
 package com.Studyhub.studyhub.controller;
 
+import com.Studyhub.studyhub.dto.request.TutorProfileUpdateRequest;
 import com.Studyhub.studyhub.dto.response.TutorCardResponse;
 import com.Studyhub.studyhub.dto.response.TutorResponse;
+import com.Studyhub.studyhub.entity.TutorProfile;
 import com.Studyhub.studyhub.service.TutorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,5 +39,12 @@ public class TutorController {
     @GetMapping("/{tutorId}")
     public ResponseEntity<TutorResponse> getTutorById(@PathVariable Long tutorId) {
         return ResponseEntity.ok(tutorService.getTutorById(tutorId));
+    }
+
+    @PutMapping("/profile/{userId}")
+    public ResponseEntity<TutorProfile> updateProfile(
+            @PathVariable Long userId,
+            @RequestBody TutorProfileUpdateRequest request) {
+        return ResponseEntity.ok(tutorService.updateProfile(userId, request));
     }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Layout & Components
 import Navbar from './components/layout/Navbar';
@@ -11,7 +12,7 @@ import AuthModal from './components/layout/AuthModal';
 import PostRequestModal from './components/layout/PostRequestModal';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRoute from './components/security/AdminRoute';
-
+import EditProfile from './components/tutor/EditProfile';
 // Pages
 import ApplicationManager from './components/parent/ApplicationManager';
 import TutorApplicationHistory from './components/tutor/TutorApplicationHistory';
@@ -97,7 +98,7 @@ function App() {
             <TutorApplicationHistory user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />
           ) : <Navigate to="/" replace />
         } />
-
+        <Route path="/tutor/:id/edit" element={<EditProfile />} />
         {/* Route Chat */}
         <Route path="/chat" element={user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} />
         <Route path="/chat/:conversationId" element={user ? <ChatPage user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} />
