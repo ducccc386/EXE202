@@ -15,6 +15,12 @@ const RequestList = ({ isHomePage = true }) => {
     useEffect(() => {
         const fetchRequests = async () => {
             try {
+<<<<<<< HEAD
+                // axios trả về dữ liệu trực tiếp trong response.data
+                const response = await api.get('/requests/homepage');
+                console.log("DEBUG - Dữ liệu nhận được từ Backend:", response.data);
+                setRequests(response.data); // Sửa: Dùng response.data thay vì response.json()
+=======
                 // SỬA: axios instance 'api' đã có baseURL là '/api', nên chỉ cần '/requests/homepage'
                 const response = await api.get('/requests/homepage');
 
@@ -22,7 +28,9 @@ const RequestList = ({ isHomePage = true }) => {
 
                 // SỬA: Dùng response.data (vì axios tự parse JSON rồi)
                 setRequests(response.data);
+>>>>>>> efb635aaa384d0f3f8a3acd158be0afefe5f2e8f
             } catch (err) {
+                console.error("DEBUG - Lỗi gọi API:", err);
                 setError('Lỗi kết nối đến máy chủ.');
             } finally {
                 setLoading(false);
