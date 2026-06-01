@@ -5,7 +5,8 @@ import Navbar from '../layout/Navbar';
 // Sửa thành đường dẫn thoát ra thư mục cha rồi vào layout
 import Sidebar from '../layout/Sidebar';
 import { Loader2, BookOpen, Clock, MessageCircle } from 'lucide-react';
-
+// Thêm dòng này vào đầu file
+import api from '../../services/api';
 const TutorApplicationHistory = ({ user, onLogout, onOpenAuth, onOpenPostRequest }) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -25,12 +26,12 @@ const TutorApplicationHistory = ({ user, onLogout, onOpenAuth, onOpenPostRequest
         const fetchHistory = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:8080/api/tutor/applications/my-applications', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                // 2. Gọi qua instance 'api' đã cấu hình sẵn baseURL và Token
+                const res = await api.get('/tutor/applications/my-applications');
                 setHistory(res.data);
-            } catch (err) { console.error("Lỗi:", err); }
+            } catch (err) {
+                console.error("Lỗi:", err);
+            }
             finally { setLoading(false); }
         };
         fetchHistory();
