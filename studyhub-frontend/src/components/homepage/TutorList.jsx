@@ -1,17 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import TutorCard from '../TutorCard';
+import TutorDetailModal from './TutorDetailModal';
 import { getTutorsForHomepage } from '../../services/tutorService';
 
 const TutorList = ({ isHomePage = true }) => {
     const [tutors, setTutors] = useState([]);
     const [loading, setLoading] = useState(true);
+    // State cho Modal
+    const [selectedTutorId, setSelectedTutorId] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         getTutorsForHomepage()
             .then(data => { setTutors(data); setLoading(false); })
             .catch(() => setLoading(false));
     }, []);
+
+    const handleOpenDetail = (id) => {
+        setSelectedTutorId(id);
+        setShowModal(true);
+    };
 
     const displayList = isHomePage ? tutors.slice(0, 4) : tutors;
 
@@ -27,8 +36,14 @@ const TutorList = ({ isHomePage = true }) => {
             {loading ? (
                 <div className="flex justify-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div></div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {displayList.map((tutor) => <TutorCard key={tutor.tutorProfileId} tutor={tutor} />)}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {displayList.map((tutor) => (
+                        <TutorCard
+                            key={tutor.tutorProfileId}
+                            tutor={tutor}
+                            onViewDetail={() => handleOpenDetail(tutor.tutorProfileId)}
+                        />
+                    ))}
                 </div>
             )}
 
@@ -39,6 +54,13 @@ const TutorList = ({ isHomePage = true }) => {
                     </Link>
                 </div>
             )}
+
+            {/* Modal nằm ở đây */}
+            <TutorDetailModal
+                show={showModal}
+                onHide={() => setShowModal(false)}
+                tutorId={selectedTutorId}
+            />
         </section>
     );
 };

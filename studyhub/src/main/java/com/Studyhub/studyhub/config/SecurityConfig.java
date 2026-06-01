@@ -15,7 +15,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -32,49 +31,48 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Cho phép truy cập công khai
+                        // 1. Cho phép tất cả các đường dẫn GET vào tutor mà KHÔNG CẦN TOKEN
+                        .requestMatchers(HttpMethod.GET, "/api/tutors/**").permitAll()
+
+                        // 2. Các đường dẫn công khai khác
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/").permitAll() // Fix lỗi 403 khi vào trang chủ
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/tutors/homepage/**").permitAll()
-                        .requestMatchers("/api/requests/homepage/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/api/conversations/**").permitAll()
-                        .requestMatchers("/api/messages/**").permitAll()
+                        .requestMatchers("/", "/api/auth/**", "/ws/**", "/api/conversations/**", "/api/messages/**")
+                        .permitAll()
+                        .requestMatchers("/api/tutors/homepage/**", "/api/requests/homepage/**").permitAll()
 
-                        // 2. Phân quyền Authority
-                        .requestMatchers("/api/applications/apply").hasAuthority("ROLE_TUTOR")
-                        .requestMatchers("/api/tutor/applications/**").hasAuthority("ROLE_TUTOR")
-                        .requestMatchers("/api/tutors/manage/**").hasAuthority("ROLE_TUTOR")
-                        .requestMatchers("/api/applications/parent/**").hasAuthority("ROLE_PARENT")
-                        .requestMatchers("/api/applications/*/status").hasAuthority("ROLE_PARENT")
-                        .requestMatchers("/api/requests/create").hasAuthority("ROLE_PARENT")
-
-                        // 3. API cần xác thực
+                        // 3. Phân quyền Authority (Các rule khắt khe)
+                        .requestMatchers("/api/applications/apply", "/api/tutor/applications/**",
+                                "/api/tutors/manage/**")
+                        .hasAuthority("ROLE_TUTOR")
+                        .requestMatchers("/api/applications/parent/**", "/api/applications/*/status",
+                                "/api/requests/create")
+                        .hasAuthority("ROLE_PARENT")
                         .requestMatchers("/api/applications/request/**").authenticated()
 
-                        // 4. Mọi request còn lại yêu cầu đăng nhập
+                        // 4. Mọi thứ khác bắt buộc phải có Token
                         .anyRequest().authenticated())
+                // 5. Thêm cấu hình này để nếu có lỗi, server sẽ in thẳng ra log
+                .exceptionHandling(ex -> ex.accessDeniedHandler((req, res, e) -> {
+                    System.err.println("!!! SPRING SECURITY CHẶN TẠI: " + req.getRequestURI());
+                    res.sendError(403, "Access Denied");
+                }))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
- @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration config = new CorsConfiguration();
-    
-    // Sử dụng setAllowedOriginPatterns thay vì setAllowedOrigins
-    config.setAllowedOriginPatterns(Arrays.asList("*")); 
-    
-    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
-    config.setExposedHeaders(Arrays.asList("Authorization"));
-    config.setAllowCredentials(true); // Vẫn giữ true để dùng được JWT
-    config.setMaxAge(3600L);
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("*")); // Cho phép mọi header để tránh lỗi CORS
+        config.setExposedHeaders(Arrays.asList("Authorization"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-    return source;
-}
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css'; // <--- TH
 
 // Layout & Components
 import Navbar from './components/layout/Navbar';
@@ -18,7 +19,7 @@ import TutorApplicationHistory from './components/tutor/TutorApplicationHistory'
 import ChatPage from './pages/chat/ChatPage';
 import AllRequests from './pages/AllRequests';
 import AllTutors from './pages/AllTutors';
-
+import TutorDetail from './pages/TutorDetail';
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isPostRequestOpen, setIsPostRequestOpen] = useState(false);
@@ -86,7 +87,7 @@ function App() {
         {/* Các trang công khai */}
         <Route path="/all-requests" element={<AllRequests user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />} />
         <Route path="/all-tutors" element={<AllTutors user={user} onLogout={handleLogout} onOpenAuth={() => setIsAuthOpen(true)} />} />
-
+        <Route path="/tutor/:id" element={<TutorDetail />} />
         {/* Route Admin */}
         <Route path="/admin" element={<AdminRoute><AdminDashboard onLogout={handleLogout} /></AdminRoute>} />
 

@@ -1,7 +1,9 @@
 package com.Studyhub.studyhub.service;
 
 import com.Studyhub.studyhub.dto.response.TutorCardResponse;
+import com.Studyhub.studyhub.dto.response.TutorResponse;
 import com.Studyhub.studyhub.entity.Subject;
+import com.Studyhub.studyhub.entity.TutorCertificate;
 import com.Studyhub.studyhub.entity.TutorProfile;
 import com.Studyhub.studyhub.repository.TutorProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +52,30 @@ public class TutorService {
 
             return response;
         }).collect(Collectors.toList());
+    }
+
+    public TutorResponse getTutorById(Long tutorId) {
+        TutorProfile profile = tutorProfileRepository.findById(tutorId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy gia sư"));
+
+        TutorResponse res = new TutorResponse();
+
+        // 1. Map các trường cơ bản (tương tự như cách bạn làm với TutorCardResponse)
+        res.setTutorProfileId(profile.getId());
+        res.setFullName(profile.getUser().getFullName());
+        res.setAvatarUrl(profile.getUser().getAvatarUrl());
+        res.setBio(profile.getBio());
+        res.setTeachingMethod(profile.getTeachingMethod());
+        res.setHourlyRate(profile.getHourlyRate());
+        res.setVerified(profile.getVerified());
+
+        // 2. Map chứng chỉ (từ bảng TutorCertificate bạn mới tạo)
+        if (profile.getCertificates() != null) {
+            res.setCertificateNames(profile.getCertificates().stream()
+                    .map(TutorCertificate::getCertificateName)
+                    .collect(Collectors.toSet()));
+        }
+
+        return res;
     }
 }

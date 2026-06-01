@@ -58,4 +58,8 @@ public class TutorProfile {
     @ManyToMany
     @JoinTable(name = "Tutor_Subjects", joinColumns = @JoinColumn(name = "tutor_profile_id"), inverseJoinColumns = @JoinColumn(name = "subject_id"))
     private Set<Subject> subjects;
+
+    // Thêm vào trong class TutorProfile
+    @OneToMany(mappedBy = "tutorProfile", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<TutorCertificate> certificates;
 }

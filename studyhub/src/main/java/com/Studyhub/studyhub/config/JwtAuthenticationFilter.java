@@ -23,7 +23,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
+        // THÊM ĐOẠN NÀY ĐỂ BỎ QUA FILTER VỚI CÁC PATH CÔNG KHAI
+        String path = request.getRequestURI();
+        if (path.startsWith("/api/tutors/") || path.startsWith("/api/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
